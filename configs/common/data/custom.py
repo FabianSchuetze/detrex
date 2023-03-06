@@ -16,11 +16,15 @@ from detrex.data import DetrDatasetMapper
 
 dataloader = OmegaConf.create()
 
-register_coco_instances("my_dataset_train", {}, '/path/to/train.json', '/path/to/train/images')
-register_coco_instances("my_dataset_test", {}, '/path/to/test.json', '/path/to/test/images')
+register_coco_instances("corpus_train", {},
+                        'datasets/corpus/annotations/train.json',
+                        'datasets/corpus/images_train')
+register_coco_instances("corpus_test", {},
+                        'datasets/corpus/annotations/test.json',
+                        'datasets/corpus/images_test')
 
 dataloader.train = L(build_detection_train_loader)(
-    dataset=L(get_detection_dataset_dicts)(names="my_dataset_train"),
+    dataset=L(get_detection_dataset_dicts)(names="corpus_train"),
     mapper=L(DetrDatasetMapper)(
         augmentation=[
             L(T.RandomFlip)(),
@@ -47,15 +51,15 @@ dataloader.train = L(build_detection_train_loader)(
             ),
         ],
         is_train=True,
-        mask_on=False,
+        mask_on=True,
         img_format="RGB",
     ),
     total_batch_size=16,
-    num_workers=4,
+    num_workers=0,
 )
 
 dataloader.test = L(build_detection_test_loader)(
-    dataset=L(get_detection_dataset_dicts)(names="my_dataset_test", filter_empty=False),
+    dataset=L(get_detection_dataset_dicts)(names="corpus_test", filter_empty=False),
     mapper=L(DetrDatasetMapper)(
         augmentation=[
             L(T.ResizeShortestEdge)(
@@ -65,10 +69,10 @@ dataloader.test = L(build_detection_test_loader)(
         ],
         augmentation_with_crop=None,
         is_train=False,
-        mask_on=False,
+        mask_on=True,
         img_format="RGB",
     ),
-    num_workers=4,
+    num_workers=0,
 )
 
 dataloader.evaluator = L(COCOEvaluator)(
