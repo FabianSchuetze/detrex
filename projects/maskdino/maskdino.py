@@ -145,6 +145,7 @@ class MaskDINO(nn.Module):
         images = ImageList.from_tensors(images, self.size_divisibility)
 
         features = self.backbone(images.tensor)
+        #breakpoint()
 
         if self.training:
             # dn_args={"scalar":30,"noise_scale":0.4}

@@ -120,6 +120,6 @@ class DetrDatasetMapper:
                 for obj in dataset_dict.pop("annotations")
                 if obj.get("iscrowd", 0) == 0
             ]
-            instances = utils.annotations_to_instances(annos, image_shape)
+            instances = utils.annotations_to_instances(annos, image_shape,  mask_format='bitmask')
             dataset_dict["instances"] = utils.filter_empty_instances(instances)
         return dataset_dict
