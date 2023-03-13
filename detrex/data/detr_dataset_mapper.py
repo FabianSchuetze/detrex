@@ -31,6 +31,7 @@ from detectron2.data import transforms as T
 __all__ = ["DetrDatasetMapper"]
 
 
+# must be the data loader. No, this is not the iter business...
 class DetrDatasetMapper:
     """
     A callable which takes a dataset dict in Detectron2 Dataset format,
@@ -115,6 +116,7 @@ class DetrDatasetMapper:
                 anno.pop("keypoints", None)
 
             # USER: Implement additional transformations if you have other types of data
+            # interesting: realy delay the transforms for the annotations...
             annos = [
                 utils.transform_instance_annotations(obj, transforms, image_shape)
                 for obj in dataset_dict.pop("annotations")

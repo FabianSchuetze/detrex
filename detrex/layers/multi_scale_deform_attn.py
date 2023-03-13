@@ -33,6 +33,12 @@ from torch.autograd import Function
 from torch.autograd.function import once_differentiable
 from torch.nn.init import constant_, xavier_uniform_
 
+def create_custom_forward(module):
+    def custom_forward(*inputs):
+        return module(*inputs)
+
+    return custom_forward
+
 
 # helpers
 def _is_power_of_2(n):
@@ -326,8 +332,10 @@ class MultiScaleDeformableAttention(nn.Module):
             )
         
         # the original impl for fp32 training
+        # maybe add the checkpointing here
         if torch.cuda.is_available() and value.is_cuda:
-            output = MultiScaleDeformableAttnFunction.apply(
+            output = torch.utils.checkpoint.checkpoint(
+                create_custom_forward(MultiScaleDeformableAttnFunction.apply),
                 value.to(torch.float32) if value.dtype==torch.float16 else value,
                 spatial_shapes,
                 level_start_index,
@@ -343,7 +351,9 @@ class MultiScaleDeformableAttention(nn.Module):
         if value.dtype==torch.float16:
             output=output.to(torch.float16)
 
-        output = self.output_proj(output)
+        output = torch.utils.checkpoint.checkpoint(
+                create_custom_forward(self.output_proj),
+                output)
 
         if not self.batch_first:
             output = output.permute(1, 0, 2)

@@ -26,6 +26,16 @@ import torch
 import torch.nn as nn
 
 
+from torch.utils.checkpoint import checkpoint
+
+
+def create_custom_forward(module):
+    def custom_forward(*inputs):
+        return module(*inputs)
+
+    return custom_forward
+
+
 class BaseTransformerLayer(nn.Module):
     # TODO: add more tutorials about BaseTransformerLayer
     """The implementation of Base `TransformerLayer` used in Transformer. Modified
@@ -167,7 +177,9 @@ class BaseTransformerLayer(nn.Module):
                 identity = query
 
             elif layer == "norm":
-                query = self.norms[norm_index](query)
+                query = checkpoint(
+                    create_custom_forward(self.norms[norm_index]),
+                    query)
                 norm_index += 1
 
             elif layer == "cross_attn":
@@ -186,7 +198,10 @@ class BaseTransformerLayer(nn.Module):
                 identity = query
 
             elif layer == "ffn":
-                query = self.ffns[ffn_index](query, identity if self.pre_norm else None)
+                query = checkpoint(
+                    create_custom_forward(self.ffns[ffn_index]),
+                    query,
+                    identity if self.pre_norm else None)
                 ffn_index += 1
 
         return query
