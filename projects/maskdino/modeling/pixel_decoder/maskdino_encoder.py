@@ -33,12 +33,6 @@ def build_pixel_decoder(cfg, input_shape):
         )
     return model
 
-def create_custom_forward(module):
-    def custom_forward(*inputs):
-        return module(*inputs)
-
-    return custom_forward
-    
 # MSDeformAttn Transformer encoder in deformable detr
 class MSDeformAttnTransformerEncoderOnly(nn.Module):
     def __init__(self, d_model=256, nhead=8,
@@ -183,11 +177,9 @@ class MSDeformAttnTransformerEncoder(nn.Module):
 
     def forward(self, src, spatial_shapes, level_start_index, valid_ratios, pos=None, padding_mask=None):
         output = src
-        #breakpoint()
         reference_points = self.get_reference_points(spatial_shapes, valid_ratios, device=src.device)
         for _, layer in enumerate(self.layers):
-            output = torch.utils.checkpoint.checkpoint(create_custom_forward(layer), output, pos, reference_points, spatial_shapes, level_start_index, padding_mask)
-            #output = layer(output, pos, reference_points, spatial_shapes, level_start_index, padding_mask)
+            output = layer(output, pos, reference_points, spatial_shapes, level_start_index, padding_mask)
 
         return output
 
@@ -349,7 +341,6 @@ class MaskDINOEncoder(nn.Module):
         srcs = []
         posl = []
         pos = []
-        #breakpoint()
         if self.total_num_feature_levels > self.transformer_num_feature_levels:
             smallest_feat = features[self.transformer_in_features[self.low_resolution_index]].float()
             _len_srcs = self.transformer_num_feature_levels
@@ -373,7 +364,6 @@ class MaskDINOEncoder(nn.Module):
             srcs = srcsl
             pos = posl
         # import ipdb; ipdb.set_trace()
-        #breakpoint()
         y, spatial_shapes, level_start_index = self.transformer(srcs, masks, pos)
         bs = y.shape[0]
 
