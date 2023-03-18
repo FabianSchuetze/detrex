@@ -49,7 +49,7 @@ train.device = "cuda"
 # # please notice that this is total batch size.
 # # surpose you're using 4 gpus for training and the batch size for
 # # each gpu is 16/4 = 4
-dataloader.train.total_batch_size = 8
+dataloader.train.total_batch_size = 1
 
 # modify optimizer config
 optimizer.lr = 1e-4 * dataloader.train.total_batch_size / 16
