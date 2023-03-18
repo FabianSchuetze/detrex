@@ -26,7 +26,7 @@ optimizer = get_config("common/optim.py").AdamW
 
 # initialize checkpoint to be loaded
 train.init_checkpoint = "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
-train.output_dir = "./output/dab_detr_r50_50ep"
+train.output_dir = "./output/maskdino_r50_corpus"
 
 
 # run evaluation every 5000 iters

@@ -16,7 +16,7 @@ from detectron2.layers import Conv2d, ShapeSpec, get_norm
 
 
 dim=256
-n_class=80
+n_class=1
 dn="seg"
 dec_layers = 9
 input_shape={'res2': ShapeSpec(channels=256, height=None, width=None, stride=4), 'res3': ShapeSpec(channels=512, height=None, width=None, stride=8), 'res4': ShapeSpec(channels=1024, height=None, width=None, stride=16), 'res5': ShapeSpec(channels=2048, height=None, width=None, stride=32)}
@@ -56,7 +56,7 @@ model = L(MaskDINO)(
             mask_classification=True,
             num_classes="${..num_classes}",
             hidden_dim=dim,
-            num_queries=300,
+            num_queries=300, # seesm to be different
             nheads=8,
             dim_feedforward=2048,
             dec_layers=dec_layers,
@@ -64,7 +64,7 @@ model = L(MaskDINO)(
             enforce_input_project=False,
             two_stage=True,
             dn=dn,
-            noise_scale=0.4,
+            noise_scale=1.0,
             dn_num=100,
             initialize_box_type='mask2box',
             initial_pred=True,
