@@ -3,6 +3,8 @@ from .models.dino_r50 import model
 
 # get default config
 dataloader = get_config("common/data/custom.py").dataloader
+#from detectron2.data.datasets import register_coco_instances
+#register_coco_instances("corpus", {}, "json_annotation.json", "path/to/image/dir")
 optimizer = get_config("common/optim.py").AdamW
 lr_multiplier = get_config("common/coco_schedule.py").lr_multiplier_12ep
 train = get_config("common/train.py").train
@@ -15,10 +17,10 @@ train.output_dir = "./output/dino_r50_4scale_12ep"
 train.max_iter = 90000
 
 # run evaluation every 5000 iters
-train.eval_period = 2000
+train.eval_period = 4000
 
 # log training infomation every 20 iters
-train.log_period = 20
+train.log_period = 50
 
 # save checkpoint every 5000 iters
 train.checkpointer.period = 2000
@@ -35,7 +37,7 @@ model.device = train.device
 # please notice that this is total batch size.
 # surpose you're using 4 gpus for training and the batch size for
 # each gpu is 16/4 = 4
-dataloader.train.total_batch_size = 16
+dataloader.train.total_batch_size = 12
 
 # modify optimizer config
 optimizer.lr = 1e-4 * dataloader.train.total_batch_size / 16
@@ -44,7 +46,7 @@ optimizer.weight_decay = 1e-4
 optimizer.params.lr_factor_func = lambda module_name: 0.1 if "backbone" in module_name else 1
 
 # modify dataloader config
-dataloader.train.num_workers = 8
+dataloader.train.num_workers = 4
 
 # dump the testing results into output_dir for visualization
 dataloader.evaluator.output_dir = train.output_dir

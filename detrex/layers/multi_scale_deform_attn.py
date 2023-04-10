@@ -333,7 +333,6 @@ class MultiScaleDeformableAttention(nn.Module):
         
         # the original impl for fp32 training
         # maybe add the checkpointing here
-        breakpoint()
         if torch.cuda.is_available() and value.is_cuda:
             output = torch.utils.checkpoint.checkpoint(
                 create_custom_forward(MultiScaleDeformableAttnFunction.apply),
